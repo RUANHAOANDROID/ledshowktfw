@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Listener</title>
+</head>
+<body>
+<h1>Server-Sent Events (SSE) Listener</h1>
+<ul id="sseData"></ul>
+
+<script>
+    // 创建 EventSource 对象，指定 SSE 服务器的地址
+    const eventSource = new EventSource('http://localhost:8080/sse');
+
+    // 监听 SSE 事件
+    eventSource.onmessage = function(event) {
+        // 在页面上创建新的列表项，显示收到的 SSE 数据
+        const sseDataList = document.getElementById('sseData');
+        const listItem = document.createElement('li');
+        listItem.textContent = event.data;
+        sseDataList.appendChild(listItem);
+        console.log('---ommessage');
+    };
+
+    // 监听 SSE 连接状态
+    eventSource.onopen = function() {
+        console.log('SSE connection opened');
+    };
+
+    eventSource.onerror = function(event) {
+        console.error('SSE error occurred:', event);
+    };
+</script>
+</body>
+</html>

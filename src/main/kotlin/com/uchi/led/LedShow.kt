@@ -1,6 +1,7 @@
 package com.uchi.led
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import onbon.bx06.Bx6GEnv
 import onbon.bx06.Bx6GScreenClient
 import onbon.bx06.area.DynamicBxArea
@@ -13,9 +14,14 @@ import onbon.bx06.utils.DisplayStyleFactory
 
 class LedShow(var ledParameters: LedParameters) {
     var connected = false
+        private set
     var name = "LED"
-    private var ip: String = "192.168.8.199"
+        private set
+    var ip: String = "192.168.8.199"
+        private set
     private var port: Int = 5005
+    var status = ""
+        private set
     private val screen by lazy {
         Bx6GEnv.initial()
         Bx6GScreenClient("MyScreen", Bx6M())
@@ -24,26 +30,27 @@ class LedShow(var ledParameters: LedParameters) {
     suspend fun connect(): Boolean {
         this.ip = ledParameters.ip
         this.port = ledParameters.port
+        this.name = ledParameters.ip
         connected = screen.connect(ip, port)
         ledStatusCall?.let { it(if (connected) "连接成功" else "连接失败") }
         return connected
     }
 
     suspend fun reconnect() {
-        ledStatusCall?.let { it("正在重连.") }
+        statusChange("正在重连.")
         delay(500)
-        ledStatusCall?.let { it("正在重连..") }
+        statusChange("正在重连..")
         delay(500)
-        ledStatusCall?.let { it("正在重连...") }
+        statusChange("正在重连...")
         delay(500)
-        ledStatusCall?.let { it("正在重连....") }
+        statusChange("正在重连....")
         delay(500)
         connected = screen.connect(ip, port)
-        ledStatusCall?.let { it("正在重连.....") }
+        statusChange("正在重连.....")
         if (connected) {
-            ledStatusCall?.let { it("连接成功") }
+            statusChange("连接成功")
         } else {
-            ledStatusCall?.let { it("连接失败") }
+            statusChange("连接失败")
         }
     }
 
@@ -110,20 +117,20 @@ class LedShow(var ledParameters: LedParameters) {
             area.addPage(page)
             screen.writeDynamic(rule, area)
         }.onSuccess {
-            ledStatusCall?.let { it1 -> it1("设定显示内容成功") }
+            statusChange("设定显示内容成功")
             try {
                 val resultString = it.toString()
-                ledStatusCall?.let { it1 -> it1("$resultString") }
+                statusChange("$resultString")
                 if (resultString.contains("断线")) {
                     disconnect()
                     reconnect()
                 }
             } catch (e: Exception) {
-                ledStatusCall?.let { it1 -> it1("设定成功，解析LED返回失败") }
+                statusChange("设定成功，解析LED返回失败")
             }
         }.onFailure {
             //errCall("${it.message}")
-            ledStatusCall?.let { it1 -> it1("设定显示内容失败") }
+            statusChange("设定显示内容失败")
         }
     }
 
@@ -198,4 +205,12 @@ class LedShow(var ledParameters: LedParameters) {
     fun registerStatus(ledStatusCall: ((String) -> Unit)) {
         this.ledStatusCall = ledStatusCall
     }
+
+    private fun statusChange(status: String) {
+        this.status = status
+        ledStatusCall?.let {
+            it(status)
+        }
+    }
+
 }
