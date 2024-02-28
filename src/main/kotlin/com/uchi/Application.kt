@@ -1,6 +1,7 @@
 package com.uchi
 
-import com.uchi.uchiserver.UchiServer
+import com.uchi.led.LedParameters
+import com.uchi.led.LedShow
 import com.uchi.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,27 +10,53 @@ import kotlinx.coroutines.*
 
 fun main() {
 
-    val embeddedServer = embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    val embeddedServer = embeddedServer(Netty, port = 6688, host = "0.0.0.0", module = Application::module)
     val ledJob = Constants.CoroutineScope.launch {
         while (true) {
-            delay(1000)
-            if (Constants.AuthCode == "") {
-                break
-            }
-            val leds = UchiServer.test(Constants.AuthCode)
-//            leds.forEach {
-//                it.connect()
-//            }
-//            println("responseBody")
-//            if (leds.isNotEmpty()) {
-//                leds.forEach {
-//                    runCatching {
-//                        it.setLedContent(0, 1)
-//                    }
-//                }
-//            }
-        }
+            delay(3000)
+            runCatching {
+                if (Constants.AuthCode == "") {
+                    getAuthJson()?.let {
+                        Constants.AuthCode = it.auth
+                    }
+                    return@runCatching
+                }
+                if (Constants.LED_DEVICES.isNullOrEmpty()) {
+                    getLedJson()?.let {
+                        it.forEach {
+                            val ledParams = LedParameters().apply {
+                                this.title = it.name
+                                this.ip = it.ip
+                                this.x = it.x
+                                this.y = it.y
+                                this.port = it.port
+                                this.height = it.h
+                                this.width = it.w
+                                this.fontSize = it.fontSize
+                            }
+                            Constants.LED_DEVICES.add(LedShow(ledParams))
+                        }
+                    }
+                    return@runCatching
+                }
 
+                Constants.LED_DEVICES.forEach {
+                    if (!it.connected) {
+                        it.connect()
+                    }
+                }
+                Constants.LED_DEVICES.forEach {
+                    if (it.connected) {
+                        it.setLedContent(0, 1)
+                    }
+                }
+            }.onFailure {
+                println(it)
+            }.onSuccess {
+                println("led success")
+            }
+
+        }
     }
     ledJob.start()
     embeddedServer.start(wait = true)

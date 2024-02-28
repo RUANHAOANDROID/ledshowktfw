@@ -7,8 +7,8 @@ import kotlinx.serialization.encodeToString
 val SUCCESS = 1
 val FAIL = 0
 
-fun <T> respSuccess(data: T? = null): String {
-    val serializer = UChiResp(code = SUCCESS, msg = "SUCCESS", udata = data)
+fun  respSuccess(): String {
+    val serializer = UChiResp(code = SUCCESS, msg = "SUCCESS", udata = "SUCCESS")
     return json.encodeToString(serializer)
 }
 

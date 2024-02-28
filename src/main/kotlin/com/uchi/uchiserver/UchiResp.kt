@@ -8,11 +8,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UChiResp<T>(
     @SerialName("code")
-    val code: Int = 0,
+    var code: Int = 0,
     @SerialName("data")
-    val udata: T? = null,
+    var udata: T? = null,
     @SerialName("msg")
-    val msg: String = "null",
+    var msg: String = "null",
 )
 
 @Serializable
@@ -26,15 +26,15 @@ data class LimitsInfo(
 @Serializable
 data class LedListData(
     val deleted: String,
-    val fontSize: String,
-    val h: String,
+    val fontSize: Int,
+    val h: Int,
     val ip: String,
     val ledConfigId: String,
     val locationId: String,
     val name: String,
-    val port: String,
+    val port: Int,
     val status: String,
-    val w: String,
-    val x: String,
-    val y: String
+    val w: Int,
+    val x: Int,
+    val y: Int
 )

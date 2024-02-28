@@ -14,5 +14,5 @@ object Constants {
     var IN_COUNT = 0
     var OUT_COUNT = 0
     var EXITS_COUNT = 0
-    var AuthCode = "1a2d3"
+    var AuthCode = ""
 }

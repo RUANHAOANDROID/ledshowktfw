@@ -32,7 +32,7 @@ class LedShow(var ledParameters: LedParameters) {
         this.port = ledParameters.port
         this.name = ledParameters.ip
         connected = screen.connect(ip, port)
-        ledStatusCall?.let { it(if (connected) "连接成功" else "连接失败") }
+        statusChange(if (connected) "连接成功" else "连接失败")
         return connected
     }
 
