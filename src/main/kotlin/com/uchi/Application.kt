@@ -13,10 +13,10 @@ fun main() {
     val ledJob = Constants.CoroutineScope.launch {
         while (true) {
             delay(1000)
-            if (Constants.authCode == "") {
+            if (Constants.AuthCode == "") {
                 break
             }
-            val leds = UchiServer.test(Constants.authCode)
+            val leds = UchiServer.test(Constants.AuthCode)
 //            leds.forEach {
 //                it.connect()
 //            }

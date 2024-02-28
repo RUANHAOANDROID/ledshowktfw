@@ -44,6 +44,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:1.6.7")
     implementation("io.ktor:ktor-client-json:1.6.7")
     implementation("org.xerial:sqlite-jdbc:3.36.0.2")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

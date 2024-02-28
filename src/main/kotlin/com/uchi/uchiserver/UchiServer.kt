@@ -1,5 +1,6 @@
 package com.uchi.uchiserver
 
+import com.uchi.Constants
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -22,41 +23,51 @@ fun String.throwUChiException() {
     throw UChiException(this)
 }
 
+val json = Json {
+//    isLenient = true
+    ignoreUnknownKeys = true
+}
+
 object UchiServer {
-    val url = "http://limit.api.yyxcloud.com"
+    val url = Constants.UChiUrl
     val client = HttpClient(CIO) // 安装 JsonFeature
 
-    val json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
+
     suspend fun test(authCode: String) {
         ledList(authCode)
     }
 
-    suspend fun getInfo(authCode: String): UChiResp<String?> {
+    suspend fun getInfo(authCode: String): Pair<String, UChiResp<LimitsInfo?>> {
         val resp = client.get(url + "/gateMachine/queryLocation/${authCode}")
         val data = jsonStr(resp)
-        return json.decodeFromString<UChiResp<String?>>(data)
+        val second = json.decodeFromString<UChiResp<LimitsInfo?>>(data)
+        return Pair(data, second)
     }
 
-    suspend fun ledList(authCode: String = "1a2d3"): LedList {
+    suspend fun ledList(authCode: String = "1a2d3"): UChiResp<MutableList<LedListData>?> {
         val resp = client.get(url + "/gateMachine/led/list/${authCode}")
         val data = resp.body<String>()
-        val list = json.decodeFromString<LedList>(data)
+        val list = json.decodeFromString<UChiResp<MutableList<LedListData>?>>(data)
         return list
     }
 
-    suspend fun existCount(authCode: String): BasicInt {
-        val resp = client.get(url + "/gateMachine/existCount/${authCode}")
-        val data = resp.body<String>()
-        return json.decodeFromString<BasicInt>(data)
+
+    suspend fun inCount(authCode: String): UChiResp<Int?> {
+        val resp = client.get(url + "/gateMachine/inCount/${authCode}")
+        val data = jsonStr(resp)
+        return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
-    suspend fun outCount(authCode: String): BasicInt {
+    suspend fun outCount(authCode: String): UChiResp<Int?> {
         val resp = client.get(url + "/gateMachine/outCount/${authCode}")
         val data = jsonStr(resp)
-        return json.decodeFromString<BasicInt>(data)
+        return json.decodeFromString<UChiResp<Int?>>(data)
+    }
+
+    suspend fun existCount(authCode: String): UChiResp<Int?> {
+        val resp = client.get(url + "/gateMachine/existCount/${authCode}")
+        val data = resp.body<String>()
+        return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
     private suspend fun jsonStr(resp: HttpResponse): String {
@@ -65,13 +76,8 @@ object UchiServer {
         return data
     }
 
-    suspend fun inCount(authCode: String): BasicInt {
-        val resp = client.get(url + "/gateMachine/inCount/${authCode}")
-        val data = jsonStr(resp)
-        return json.decodeFromString<BasicInt>(data)
-    }
 
-    suspend fun updateLimitCount(authCode: String, count: Int): String? {
+    suspend fun updateLimitCount(authCode: String, count: String): String? {
         val resp = client.get(url + "/gateMachine/updateLimit/${authCode}/${count}")
         val data = jsonStr(resp)
         return data

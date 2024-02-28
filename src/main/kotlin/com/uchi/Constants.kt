@@ -7,11 +7,12 @@ import kotlinx.coroutines.Dispatchers
 import java.util.*
 
 object Constants {
+    val UChiUrl = "http://limit.api.yyxcloud.com"
     val Connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
     val CoroutineScope = CoroutineScope(Dispatchers.IO)
     var LED_DEVICES = Collections.synchronizedList(mutableListOf<LedShow>())
     var IN_COUNT = 0
     var OUT_COUNT = 0
     var EXITS_COUNT = 0
-    var authCode = "1a2d3"
+    var AuthCode = "1a2d3"
 }

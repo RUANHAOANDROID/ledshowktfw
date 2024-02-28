@@ -1,12 +1,26 @@
 package com.uchi.uchiserver
 
+
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
-data class LedList(
-    val code: Int,
-    val `data`: List<LedListData>,
-    val msg: String,
+data class UChiResp<T>(
+    @SerialName("code")
+    val code: Int = 0,
+    @SerialName("data")
+    val udata: T? = null,
+    @SerialName("msg")
+    val msg: String = "null",
+)
+
+@Serializable
+data class LimitsInfo(
+    @SerialName("name")
+    val name: String,
+    @SerialName("limitsCount")
+    val limitsCount: Int
 )
 
 @Serializable

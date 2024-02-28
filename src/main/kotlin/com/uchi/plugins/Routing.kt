@@ -1,17 +1,11 @@
 package com.uchi.plugins
 
 import com.uchi.Constants
-import com.uchi.uchiserver.Fail
-import com.uchi.uchiserver.Success
-import com.uchi.uchiserver.UchiServer
-import com.uchi.uchiserver.throwUChiException
+import com.uchi.uchiserver.*
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -20,14 +14,13 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.encodeToString
 
 fun Application.configureRouting() {
     val url = "http://limit.api.yyxcloud.com"
     val client = HttpClient(CIO)
     val connections = mutableSetOf<WebSocketSession>() // 用于存储连接的集合
+
     routing {
 //        staticResources("/", "web")
         webSocket("/ws") {
@@ -54,35 +47,56 @@ fun Application.configureRouting() {
                 connections.remove(this) // 在连接关闭时移除连接
             }
         }
-        get("/sse") {
-            call.respondSse(eventsFlow())
-        }
         get("/leds/{authCode}") {
             val authCode = call.parameters["authCode"]
-            call.respond(HttpStatusCode.OK, Constants.LED_DEVICES)
+            runCatching<List<LedListData>?> {
+                val resp = UchiServer.ledList("$authCode")
+                if (resp.code.Fail()) {
+                    "云限流服务返回错误".throwUChiException()
+                }
+                if (resp.udata == null) {
+                    "没有添加LED".throwUChiException()
+                }
+                resp.udata
+            }.onFailure {
+                call.respond(HttpStatusCode.InternalServerError, respErr(it.message.toString()))
+            }.onSuccess {
+                call.respond(HttpStatusCode.OK, respSuccess(json.encodeToString(it)))
+            }
         }
         get("/auth/{authCode}") {
             val authCode = call.parameters["authCode"]
-            runCatching<String> {
-                val response = UchiServer.getInfo("$authCode")
-                if (response.code.Fail()) {
+            runCatching< UChiResp<LimitsInfo?>> {
+                val tow = UchiServer.getInfo("$authCode")
+                if (tow.second.code.Fail()) {
                     "景区不存在或其他问题".throwUChiException()
                 }
-                response.udata.toString()
+                if (tow.second.udata == null) {
+                    "Data 返回为空，请联系限流云服务".throwUChiException()
+                }
+                tow.second
+            }.onFailure {
+                call.respond(HttpStatusCode.NotFound, respErr(it.message.toString()))
             }.onSuccess {
                 call.respond(HttpStatusCode.OK, it)
-            }.onFailure {
-                call.respond(HttpStatusCode.InternalServerError, it.message.toString())
             }
         }
-        get("/updateMaxCount/{authCode}") {
-            call.respond(HttpStatusCode.OK, "")
+        get("/updateMaxCount/{authCode}/{count}") {
+            val authCode = call.parameters["authCode"]
+            val count = call.parameters["count"]
+            runCatching {
+                UchiServer.updateLimitCount("$authCode", "$count")
+            }.onFailure {
+                call.respond(HttpStatusCode.OK, respErr(it.message.toString()))
+            }.onSuccess {
+                call.respond(HttpStatusCode.OK, "")
+            }
         }
         get("/reconnect") {
             Constants.LED_DEVICES.forEach {
                 it.reconnect()
             }
-            call.respond(HttpStatusCode.OK, "Success")
+            call.respond(HttpStatusCode.OK, respSuccess(""))
         }
     }
 }
