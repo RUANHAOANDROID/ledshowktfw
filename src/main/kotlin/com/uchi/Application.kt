@@ -3,6 +3,7 @@ package com.uchi
 import com.uchi.led.LedParameters
 import com.uchi.led.LedShow
 import com.uchi.plugins.*
+import com.uchi.uchiserver.UchiServer
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -39,7 +40,11 @@ fun main() {
                     }
                     return@runCatching
                 }
-
+                val inCount = UchiServer.inCount(Constants.AuthCode)
+                inCount.udata?.let { Constants.IN_COUNT.set(it) }
+                delay(500)
+                val existCount = UchiServer.existCount(Constants.AuthCode)
+                existCount.udata?.let { Constants.OUT_COUNT.set(it) }
                 Constants.LED_DEVICES.forEach {
                     if (!it.connected) {
                         it.connect()
@@ -55,7 +60,6 @@ fun main() {
             }.onSuccess {
                 println("led success")
             }
-
         }
     }
     ledJob.start()

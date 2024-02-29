@@ -25,15 +25,11 @@ data class LimitsInfo(
 
 @Serializable
 data class LedListData(
-    val deleted: String,
     val fontSize: Int,
     val h: Int,
     val ip: String,
-    val ledConfigId: String,
-    val locationId: String,
     val name: String,
     val port: Int,
-    val status: String,
     val w: Int,
     val x: Int,
     val y: Int

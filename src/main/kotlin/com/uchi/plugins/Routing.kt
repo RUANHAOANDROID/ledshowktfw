@@ -59,7 +59,7 @@ fun Application.configureRouting() {
                 saveLedJson(resp.udata)
                 resp
             }.onFailure {
-                call.respond(HttpStatusCode.InternalServerError, respErr(it.message.toString()))
+                call.respond(HttpStatusCode.OK, respErr(it.message.toString()))
             }.onSuccess {
                 call.respond(HttpStatusCode.OK, it)
             }
@@ -77,7 +77,7 @@ fun Application.configureRouting() {
                 saveAuthJson(AuthData("$authCode"))
                 pair.second
             }.onFailure {
-                call.respond(HttpStatusCode.NotFound, respErr(it.message.toString()))
+                call.respond(HttpStatusCode.OK, respErr(it.message.toString()))
             }.onSuccess {
                 Constants.AuthCode = "$authCode"
                 call.respond(HttpStatusCode.OK, it)
@@ -170,10 +170,15 @@ suspend fun ApplicationCall.respondSse(events: Flow<SseEvent>) {
 
 fun eventsFlow(): Flow<SseEvent> = flow {
     while (true) {
+        if (Constants.AuthCode == "") continue
+        if (Constants.LED_DEVICES.isNullOrEmpty()) continue
+        emit(SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}"))
+        emit(SseEvent(id = "b", event = "EXIST", data = "${Constants.OUT_COUNT.get()}"))
         Constants.LED_DEVICES.forEach { led ->
             emit(SseEvent(id = led.ip, event = "LED", data = led.status))
+            delay(200)
         }
-        delay(2000)
+        delay(3000)
     }
 }
 
