@@ -23,7 +23,7 @@ fun Application.configureRouting() {
     var isRun = AtomicBoolean(false)
     routing {
         staticResources("/", "web")
-        webSocket("/ws") {
+        webSocket("/ws/{uid}") {
             println("onConnect!")
             val uid = "${call.parameters["uid"]}"
             Constants.WsSessions[uid] = this  // 将连接添加到集合中
