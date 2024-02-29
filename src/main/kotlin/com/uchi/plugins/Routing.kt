@@ -13,37 +13,44 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 fun Application.configureRouting() {
-    val connections = mutableSetOf<WebSocketSession>() // 用于存储连接的集合
     var isRun = AtomicBoolean(false)
     routing {
         staticResources("/", "web")
         webSocket("/ws") {
             println("onConnect!")
-            connections.add(this)  // 将连接添加到集合中
+            val uid = "${call.parameters["uid"]}"
+            Constants.WsSessions[uid] = this  // 将连接添加到集合中
             try {
-                eventsFlow().collect { event ->
-                    println("event send !")
-                    connections.forEach { session ->
-                        println("event send to $session")
-                        session.send(
-                            "{\n" +
-                                    "  \"id\": \"${event.id}\",\n" +
-                                    "  \"event\": \"${event.event}\",\n" +
-                                    "  \"data\": \"${event.data}\"\n" +
-                                    "}\n"
-                        )
+                launch {
+                    while (true){
+                        delay(5000)
                     }
-                }
+                }.join()
+//                eventsFlow().collect { event ->
+//                    println("event send !")
+//                    Constants.WsSessions.forEach { session ->
+//                        println("event send to $session")
+//                        session.value.send(
+//                            "{\n" +
+//                                    "  \"id\": \"${event.id}\",\n" +
+//                                    "  \"event\": \"${event.event}\",\n" +
+//                                    "  \"data\": \"${event.data}\"\n" +
+//                                    "}\n"
+//                        )
+//                    }
+//                }
             } catch (e: ClosedReceiveChannelException) {
                 println("WebSocket connection closed.")
+                Constants.WsSessions.remove(uid,this)
             } finally {
-                connections.remove(this) // 在连接关闭时移除连接
+                Constants.WsSessions.remove(uid,this) // 在连接关闭时移除连接
             }
         }
         get("/leds/{authCode}") {

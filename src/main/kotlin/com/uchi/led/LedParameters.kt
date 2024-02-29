@@ -15,4 +15,5 @@ data class LedParameters(
     var width: Int = 32,
     var height: Int = 16,
     var fontSize: Int = 10,
+    var displayMode:Byte=0x00,
 )

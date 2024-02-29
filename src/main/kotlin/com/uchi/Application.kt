@@ -7,6 +7,7 @@ import com.uchi.uchiserver.UchiServer
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.*
 
 fun main() {
@@ -34,6 +35,7 @@ fun main() {
                                 this.height = it.h
                                 this.width = it.w
                                 this.fontSize = it.fontSize
+                                this.displayMode=it.displayMode.removePrefix("0x").toInt(16).toByte()
                             }
                             Constants.LED_DEVICES.add(LedShow(ledParams))
                         }
@@ -53,6 +55,22 @@ fun main() {
                 Constants.LED_DEVICES.forEach {
                     if (it.connected) {
                         it.setLedContent(0, 1)
+                    }
+                }
+                // send msg
+                val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
+                val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.OUT_COUNT.get()}"))
+                Constants.WsSessions.values.forEach { session ->
+                    println("---send $existSSE")
+                    session.send(existSSE.toJson())
+                    println("---send $inSSE")
+                    session.send(inSSE.toJson())
+                }
+                Constants.LED_DEVICES.forEach { led ->
+                    val ledSSE = SseEvent(id = led.ip, event = "LED", data = led.status)
+                    Constants.WsSessions.values.forEach { session ->
+                        println("---send $ledSSE")
+                        session.send(ledSSE.toJson())
                     }
                 }
             }.onFailure {

@@ -32,5 +32,7 @@ data class LedListData(
     val port: Int,
     val w: Int,
     val x: Int,
-    val y: Int
+    val y: Int,
+    @SerialName("displayMethod")
+    val displayMode: String
 )

@@ -104,7 +104,7 @@ class LedShow(var ledParameters: LedParameters) {
             val rule = DynamicBxAreaRule()
             rule.id = 0
             rule.immediatePlay = 1.toByte()
-            rule.runMode = 0.toByte()
+            rule.runMode = ledParameters.displayMode
             val area = DynamicBxArea(
                 ledParameters.x,
                 ledParameters.y,
@@ -113,7 +113,7 @@ class LedShow(var ledParameters: LedParameters) {
                 screen.profile
             )
             val page = TextBxPage("今日接待${inCount}")
-            page.newLine("实时在园${existCount}")
+//            page.newLine("实时在园${existCount}")
             area.addPage(page)
             screen.writeDynamic(rule, area)
         }.onSuccess {
