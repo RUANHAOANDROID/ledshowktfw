@@ -70,17 +70,17 @@ object UchiServer {
         return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
+    suspend fun updateLimitCount(authCode: String, count: String): UChiResp<String?> {
+        val resp = client.get(url + "/gateMachine/updateLimit/${authCode}/${count}")
+        val data = jsonStr(resp)
+        return json.decodeFromString<UChiResp<String?>>(data)
+    }
+
     private suspend fun jsonStr(resp: HttpResponse): String {
         val data = resp.body<String>()
         println(data)
         return data
     }
 
-
-    suspend fun updateLimitCount(authCode: String, count: String): String? {
-        val resp = client.get(url + "/gateMachine/updateLimit/${authCode}/${count}")
-        val data = jsonStr(resp)
-        return data
-    }
 
 }

@@ -29,7 +29,7 @@ fun Application.configureRouting() {
             Constants.WsSessions[uid] = this  // 将连接添加到集合中
             try {
                 launch {
-                    while (true){
+                    while (true) {
                         delay(5000)
                     }
                 }.join()
@@ -48,9 +48,9 @@ fun Application.configureRouting() {
 //                }
             } catch (e: ClosedReceiveChannelException) {
                 println("WebSocket connection closed.")
-                Constants.WsSessions.remove(uid,this)
+                Constants.WsSessions.remove(uid, this)
             } finally {
-                Constants.WsSessions.remove(uid,this) // 在连接关闭时移除连接
+                Constants.WsSessions.remove(uid, this) // 在连接关闭时移除连接
             }
         }
         get("/leds/{authCode}") {
@@ -93,12 +93,13 @@ fun Application.configureRouting() {
         get("/updateMaxCount/{authCode}/{count}") {
             val authCode = call.parameters["authCode"]
             val count = call.parameters["count"]
-            runCatching {
-                UchiServer.updateLimitCount("$authCode", "$count")
+            runCatching<UChiResp<String?>> {
+                val resp = UchiServer.updateLimitCount("$authCode", "$count")
+                resp
             }.onFailure {
                 call.respond(HttpStatusCode.OK, respErr(it.message.toString()))
             }.onSuccess {
-                call.respond(HttpStatusCode.OK, respSuccess())
+                call.respond(HttpStatusCode.OK, it)
             }
         }
         get("/recon/{ip}") {
