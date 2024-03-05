@@ -63,6 +63,7 @@ fun Application.configureRouting() {
                 if (resp.udata == null) {
                     "没有添加LED".throwUChiException()
                 }
+                saveAuthJson(AuthData("$authCode"))
                 saveLedJson(resp.udata)
                 resp
             }.onFailure {

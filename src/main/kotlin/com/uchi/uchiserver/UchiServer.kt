@@ -38,14 +38,18 @@ object UchiServer {
     }
 
     suspend fun getInfo(authCode: String): Pair<String, UChiResp<LimitsInfo?>> {
-        val resp = client.get(url + "/gateMachine/queryLocation/${authCode}")
+        val urlString = url + "/gateMachine/queryLocation/${authCode}"
+        println(url)
+        val resp = client.get(urlString)
         val data = jsonStr(resp)
         val second = json.decodeFromString<UChiResp<LimitsInfo?>>(data)
         return Pair(data, second)
     }
 
     suspend fun ledList(authCode: String = "1a2d3"): UChiResp<MutableList<LedListData>?> {
-        val resp = client.get(url + "/gateMachine/led/list/${authCode}")
+        val urlString = url + "/gateMachine/led/list/${authCode}"
+        println(urlString)
+        val resp = client.get(urlString)
         val data = resp.body<String>()
         val list = json.decodeFromString<UChiResp<MutableList<LedListData>?>>(data)
         return list
@@ -53,25 +57,33 @@ object UchiServer {
 
 
     suspend fun inCount(authCode: String): UChiResp<Int?> {
-        val resp = client.get(url + "/gateMachine/inCount/${authCode}")
+        val urlString = url + "/gateMachine/inCount/${authCode}"
+        println(urlString)
+        val resp = client.get(urlString)
         val data = jsonStr(resp)
         return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
     suspend fun outCount(authCode: String): UChiResp<Int?> {
-        val resp = client.get(url + "/gateMachine/outCount/${authCode}")
+        val urlString = url + "/gateMachine/outCount/${authCode}"
+        println(urlString)
+        val resp = client.get(urlString)
         val data = jsonStr(resp)
         return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
     suspend fun existCount(authCode: String): UChiResp<Int?> {
-        val resp = client.get(url + "/gateMachine/existCount/${authCode}")
+        val urlString = url + "/gateMachine/existCount/${authCode}"
+        println(urlString)
+        val resp = client.get(urlString)
         val data = resp.body<String>()
         return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
     suspend fun updateLimitCount(authCode: String, count: String): UChiResp<String?> {
-        val resp = client.get(url + "/gateMachine/updateLimit/${authCode}/${count}")
+        val urlString = url + "/gateMachine/updateLimit/${authCode}/${count}"
+        println(urlString)
+        val resp = client.get(urlString)
         val data = jsonStr(resp)
         return json.decodeFromString<UChiResp<String?>>(data)
     }
