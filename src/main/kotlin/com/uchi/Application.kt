@@ -9,6 +9,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.exposedLogger
 
 fun main() {
 
@@ -35,18 +36,19 @@ fun main() {
                                 this.height = it.h
                                 this.width = it.w
                                 this.fontSize = it.fontSize
-                                this.displayMode=it.displayMode.removePrefix("0x").toInt(16).toByte()
+                                this.displayMode = it.displayMode.removePrefix("0x").toInt(16).toByte()
                             }
                             Constants.LED_DEVICES.add(LedShow(ledParams))
                         }
                     }
                     return@runCatching
                 }
-                val inCount = UchiServer.inCount(Constants.AuthCode)
-                inCount.udata?.let { Constants.IN_COUNT.set(it) }
-                delay(500)
-                val existCount = UchiServer.existCount(Constants.AuthCode)
-                existCount.udata?.let { Constants.OUT_COUNT.set(it) }
+                val limitInfo = UchiServer.getInfo(Constants.AuthCode)
+                limitInfo.second.udata?.let {
+                    Constants.OUT_COUNT.set(it.outCount)
+                    Constants.EXITS_COUNT.set(it.existCount)
+                    Constants.IN_COUNT.set(it.inCount)
+                }
                 Constants.LED_DEVICES.forEach {
                     if (!it.connected) {
                         it.connect()
@@ -59,7 +61,7 @@ fun main() {
                 }
                 // send msg
                 val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
-                val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.OUT_COUNT.get()}"))
+                val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
                 Constants.WsSessions.values.forEach { session ->
                     println("---send $existSSE")
                     session.send(existSSE.toJson())
@@ -74,9 +76,10 @@ fun main() {
                     }
                 }
             }.onFailure {
-                println(it)
+                it.printStackTrace()
             }.onSuccess {
-                println("led success")
+                println("loop job success")
+                exposedLogger.debug("aAAAAAA")
             }
         }
     }

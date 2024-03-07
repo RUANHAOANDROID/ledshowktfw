@@ -12,8 +12,9 @@ import org.slf4j.event.Level
 import java.time.Duration
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-
+import org.slf4j.event.*
 fun Application.configureHTTP() {
+    log.info("Hello from module!")
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)

@@ -31,53 +31,22 @@ val json = Json {
 object UchiServer {
     val url = Constants.UChiUrl
     val client = HttpClient(CIO) // 安装 JsonFeature
-
-
-    suspend fun test(authCode: String) {
-        ledList(authCode)
-    }
-
     suspend fun getInfo(authCode: String): Pair<String, UChiResp<LimitsInfo?>> {
         val urlString = url + "/gateMachine/queryLocation/${authCode}"
-        println(url)
+        println(urlString)
         val resp = client.get(urlString)
         val data = jsonStr(resp)
         val second = json.decodeFromString<UChiResp<LimitsInfo?>>(data)
         return Pair(data, second)
     }
 
-    suspend fun ledList(authCode: String = "1a2d3"): UChiResp<MutableList<LedListData>?> {
+    suspend fun ledList(authCode: String): UChiResp<MutableList<LedListData>?> {
         val urlString = url + "/gateMachine/led/list/${authCode}"
         println(urlString)
         val resp = client.get(urlString)
         val data = resp.body<String>()
         val list = json.decodeFromString<UChiResp<MutableList<LedListData>?>>(data)
         return list
-    }
-
-
-    suspend fun inCount(authCode: String): UChiResp<Int?> {
-        val urlString = url + "/gateMachine/inCount/${authCode}"
-        println(urlString)
-        val resp = client.get(urlString)
-        val data = jsonStr(resp)
-        return json.decodeFromString<UChiResp<Int?>>(data)
-    }
-
-    suspend fun outCount(authCode: String): UChiResp<Int?> {
-        val urlString = url + "/gateMachine/outCount/${authCode}"
-        println(urlString)
-        val resp = client.get(urlString)
-        val data = jsonStr(resp)
-        return json.decodeFromString<UChiResp<Int?>>(data)
-    }
-
-    suspend fun existCount(authCode: String): UChiResp<Int?> {
-        val urlString = url + "/gateMachine/existCount/${authCode}"
-        println(urlString)
-        val resp = client.get(urlString)
-        val data = resp.body<String>()
-        return json.decodeFromString<UChiResp<Int?>>(data)
     }
 
     suspend fun updateLimitCount(authCode: String, count: String): UChiResp<String?> {
@@ -93,6 +62,4 @@ object UchiServer {
         println(data)
         return data
     }
-
-
 }

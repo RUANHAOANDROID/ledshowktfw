@@ -114,7 +114,6 @@ fun Application.configureRouting() {
                     }
                 }
             }
-
             call.respond(HttpStatusCode.OK, respSuccess())
         }
         get("/writeJsonToFile") {

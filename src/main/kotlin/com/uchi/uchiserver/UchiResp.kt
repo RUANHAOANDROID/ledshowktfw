@@ -20,7 +20,13 @@ data class LimitsInfo(
     @SerialName("name")
     val name: String,
     @SerialName("limitsCount")
-    val limitsCount: Int
+    val limitsCount: Int,
+    @SerialName("inCount")
+    val inCount :Int,
+    @SerialName("outCount")
+    val outCount :Int,
+    @SerialName("existCount")
+    val existCount :Int,
 )
 
 @Serializable
