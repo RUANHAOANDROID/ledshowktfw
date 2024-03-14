@@ -5,15 +5,15 @@ steps:
   - name: build
     image: gradle:8.4
     volumes:
-      - name: sdk
-        path: /drone/src/sdk
+      - name: build_web
+        path: /drone/src/src/resources/web
       - name: gradle-cache
         path: /home/gradle/.gradle
     environment:
       ANDROID_HOME: /drone/src/sdk
     commands:
       - chmod +x gradlew
-      - ./gradlew assembleRelease --stacktrace
+      - ./gradlew assemble --stacktrace
   - name: upload
     image: minio/mc:RELEASE.2024-01-16T16-06-34Z
     environment:
@@ -26,12 +26,10 @@ steps:
     commands:
       - mc config host add mio $ADDRESS $ACCESS_KEY $SECRET_KEY
       - mc cp CHANGES.md mio/uchi
-      - mc cp app/build/outputs/apk/landscape/release/*.apk mio/uchi/apk/portrait
-      - mc cp app/build/outputs/apk/portrait/release/*.apk mio/uchi/apk/landscape
 volumes:
-  - name: sdk
+  - name: build_web
     host:
-      path: /mnt/user/appdata/drone/tools/android/sdk
+      path: /mnt/user/appdata/drone/build/flutter/web
   - name: gradle-cache
     host:
-      path: /mnt/user/appdata/drone/tools/gradle/cache-agmapp
+      path: /mnt/user/appdata/drone/tools/gradle/cache-ledshowktfw

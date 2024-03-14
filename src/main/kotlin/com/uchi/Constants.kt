@@ -17,5 +17,6 @@ object Constants {
     var IN_COUNT = AtomicInteger(0)
     var OUT_COUNT = AtomicInteger(0)
     var EXITS_COUNT = AtomicInteger(0)
+    var MAX_COUNT = AtomicInteger(0)
     var AuthCode = ""
 }

@@ -24,6 +24,35 @@ fun main() {
                     }
                     return@runCatching
                 }
+                val limitInfo = UchiServer.getInfo(Constants.AuthCode)
+                limitInfo.second.udata?.let {
+                    Constants.OUT_COUNT.set(it.outCount)
+                    Constants.EXITS_COUNT.set(it.existCount)
+                    Constants.IN_COUNT.set(it.inCount)
+                    Constants.MAX_COUNT.set(it.limitsCount)
+                }
+                Constants.LED_DEVICES.forEach {
+                    if (!it.connected) {
+                        it.connect()
+                    }
+                }
+                Constants.LED_DEVICES.forEach {
+                    if (it.connected) {
+                        it.setLedContent(0, 1)
+                    }
+                }
+                // send msg
+                val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
+                val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
+                val maxCount = (SseEvent(id = "b", event = "LIMIT", data = "${Constants.MAX_COUNT.get()}"))
+                Constants.WsSessions.values.forEach { session ->
+                    println("---send $existSSE")
+                    session.send(existSSE.toJson())
+                    println("---send $inSSE")
+                    session.send(inSSE.toJson())
+                    println("---send$maxCount")
+                    session.send(maxCount.toJson())
+                }
                 if (Constants.LED_DEVICES.isNullOrEmpty()) {
                     getLedJson()?.let {
                         it.forEach {
@@ -43,31 +72,7 @@ fun main() {
                     }
                     return@runCatching
                 }
-                val limitInfo = UchiServer.getInfo(Constants.AuthCode)
-                limitInfo.second.udata?.let {
-                    Constants.OUT_COUNT.set(it.outCount)
-                    Constants.EXITS_COUNT.set(it.existCount)
-                    Constants.IN_COUNT.set(it.inCount)
-                }
-                Constants.LED_DEVICES.forEach {
-                    if (!it.connected) {
-                        it.connect()
-                    }
-                }
-                Constants.LED_DEVICES.forEach {
-                    if (it.connected) {
-                        it.setLedContent(0, 1)
-                    }
-                }
-                // send msg
-                val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
-                val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
-                Constants.WsSessions.values.forEach { session ->
-                    println("---send $existSSE")
-                    session.send(existSSE.toJson())
-                    println("---send $inSSE")
-                    session.send(inSSE.toJson())
-                }
+
                 Constants.LED_DEVICES.forEach { led ->
                     val ledSSE = SseEvent(id = led.ip, event = "LED", data = led.status)
                     Constants.WsSessions.values.forEach { session ->
