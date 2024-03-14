@@ -26,7 +26,7 @@ steps:
         from_secret: MINIO_SECRET_KEY
     commands:
       - mc config host add mio $ADDRESS $ACCESS_KEY $SECRET_KEY
-      - mc cp build/distributions/* mio/uchi/ledshowktfw
+      - mc -m cp build/distributions/* mio/uchi/ledshow
 volumes:
   - name: build_web
     host:
