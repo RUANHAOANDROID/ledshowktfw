@@ -113,7 +113,7 @@ class LedShow(var ledParameters: LedParameters) {
                 screen.profile
             )
             val page = TextBxPage("今日接待${inCount}")
-//            page.newLine("实时在园${existCount}")
+            page.newLine("实时在园${existCount}")
             area.addPage(page)
             screen.writeDynamic(rule, area)
         }.onSuccess {
