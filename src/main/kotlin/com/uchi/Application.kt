@@ -38,13 +38,14 @@ fun main() {
                 }
                 Constants.LED_DEVICES.forEach {
                     if (it.connected) {
-                        it.setLedContent(0, 1)
+                        it.setLedContent(Constants.EXITS_COUNT.get(),  Constants.IN_COUNT.get())
                     }
                 }
                 // send msg
                 val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
                 val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
                 val maxCount = (SseEvent(id = "b", event = "LIMIT", data = "${Constants.MAX_COUNT.get()}"))
+
                 Constants.WsSessions.values.forEach { session ->
                     println("---send $existSSE")
                     session.send(existSSE.toJson())
