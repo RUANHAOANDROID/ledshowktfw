@@ -123,6 +123,15 @@ fun Application.configureRouting() {
 
             call.respondText("JSON written to file.")
         }
+        get("/upOut/{authCode}"){
+            val authCode = call.parameters["authCode"]
+            authCode?.let {
+                runCatching {
+                    UchiServer.upOutNumber10(it)
+                }
+            }
+            call.respond(HttpStatusCode.OK, respSuccess())
+        }
     }
 }
 
