@@ -27,6 +27,8 @@ data class LimitsInfo(
     val outCount :Int,
     @SerialName("existCount")
     val existCount :Int,
+    @SerialName("enableVAdd")
+    val enableVAdd :Boolean
 )
 
 @Serializable

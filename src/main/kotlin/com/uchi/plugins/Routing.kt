@@ -132,6 +132,15 @@ fun Application.configureRouting() {
             }
             call.respond(HttpStatusCode.OK, respSuccess())
         }
+        get("/upIn/{authCode}"){
+            val authCode = call.parameters["authCode"]
+            authCode?.let {
+                runCatching {
+                    UchiServer.upInNumber1(it)
+                }
+            }
+            call.respond(HttpStatusCode.OK, respSuccess())
+        }
     }
 }
 

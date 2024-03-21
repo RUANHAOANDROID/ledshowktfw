@@ -4,19 +4,22 @@ import com.uchi.led.LedParameters
 import com.uchi.led.LedShow
 import com.uchi.plugins.*
 import com.uchi.uchiserver.UchiServer
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.exposedLogger
+import java.io.File
+import java.util.*
 
 fun main() {
 
     val embeddedServer = embeddedServer(Netty, port = 6688, host = "0.0.0.0", module = Application::module)
     val ledJob = Constants.CoroutineScope.launch {
         while (true) {
-            delay(3000)
+            delay(2000)
             runCatching {
                 if (Constants.AuthCode == "") {
                     getAuthJson()?.let {
@@ -45,6 +48,7 @@ fun main() {
                 val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
                 val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
                 val maxCount = (SseEvent(id = "b", event = "LIMIT", data = "${Constants.MAX_COUNT.get()}"))
+                val version = (SseEvent(id = "b", event = "VERSION", data = "100117"))
 
                 Constants.WsSessions.values.forEach { session ->
                     println("---send $existSSE")
@@ -53,6 +57,8 @@ fun main() {
                     session.send(inSSE.toJson())
                     println("---send$maxCount")
                     session.send(maxCount.toJson())
+                    println("---send$version")
+                    session.send(version.toJson())
                 }
                 if (Constants.LED_DEVICES.isNullOrEmpty()) {
                     getLedJson()?.let {
@@ -85,14 +91,12 @@ fun main() {
                 it.printStackTrace()
             }.onSuccess {
                 println("loop job success")
-                exposedLogger.debug("aAAAAAA")
             }
         }
     }
     ledJob.start()
     embeddedServer.start(wait = true)
 }
-
 fun Application.module() {
     configureHTTP()
     configureRouting()

@@ -63,6 +63,13 @@ object UchiServer {
         val data = jsonStr(resp)
         return json.decodeFromString<UChiResp<String?>>(data)
     }
+    suspend fun upInNumber1(authCode: String): UChiResp<String?> {
+        val urlString = url + "/gateMachine/riseStatistic/${authCode}"
+        println(urlString)
+        val resp = client.get(urlString)
+        val data = jsonStr(resp)
+        return json.decodeFromString<UChiResp<String?>>(data)
+    }
     private suspend fun jsonStr(resp: HttpResponse): String {
         val data = resp.body<String>()
         println(data)
