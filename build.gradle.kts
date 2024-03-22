@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.uchi"
-version = "100117"
+version = "100118"
 
 application {
     mainClass.set("com.uchi.ApplicationKt")

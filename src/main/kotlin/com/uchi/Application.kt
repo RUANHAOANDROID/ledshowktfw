@@ -48,7 +48,7 @@ fun main() {
                 val inSSE = SseEvent(id = "a", event = "IN", data = "${Constants.IN_COUNT.get()}")
                 val existSSE = (SseEvent(id = "b", event = "EXIST", data = "${Constants.EXITS_COUNT.get()}"))
                 val maxCount = (SseEvent(id = "b", event = "LIMIT", data = "${Constants.MAX_COUNT.get()}"))
-                val version = (SseEvent(id = "b", event = "VERSION", data = "100117"))
+                val version = (SseEvent(id = "b", event = "VERSION", data = "100118"))
 
                 Constants.WsSessions.values.forEach { session ->
                     println("---send $existSSE")
